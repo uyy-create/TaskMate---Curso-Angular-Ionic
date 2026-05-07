@@ -7,10 +7,30 @@
 <ion-content class="ion-padding">
   <div class="welcome-section">
     <h2>¡Hola, Developer! 👋</h2>
-    <p>Tienes <strong>{{ stats.pending }} tareas</strong> pendientes.</p>
+    <p *ngIf="!loading && !error">
+      Tienes <strong>{{ stats.pending }} tareas</strong> pendientes.
+    </p>
   </div>
 
-  <ion-card>
+  <div *ngIf="loading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando tareas...</p>
+  </div>
+
+  <ion-card *ngIf="error && !loading" color="danger">
+    <ion-card-header>
+      <ion-card-title>Error de conexión</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>{{ error }}</p>
+      <ion-button expand="block" fill="outline" color="light" class="ion-margin-top" (click)="loadStats()">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Reintentar
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="!loading && !error">
     <ion-card-header>
       <ion-card-title>Resumen del día</ion-card-title>
     </ion-card-header>
@@ -32,7 +52,6 @@
         </ion-row>
       </ion-grid>
 
-      <!-- Barra de progreso -->
       <div class="ion-margin-top">
         <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
           <small>Progreso del día</small>
@@ -46,7 +65,12 @@
     </ion-card-content>
   </ion-card>
 
-  <ion-button expand="block" color="primary" class="ion-margin-top" (click)="openAddTaskModal()">
+  <ion-button
+    *ngIf="!loading && !error"
+    expand="block"
+    color="primary"
+    class="ion-margin-top"
+    (click)="openAddTaskModal()">
     <ion-icon name="add" slot="start"></ion-icon>
     Añadir tarea
   </ion-button>

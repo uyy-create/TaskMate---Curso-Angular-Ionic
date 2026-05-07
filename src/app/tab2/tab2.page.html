@@ -5,43 +5,59 @@
 </ion-header>
 
 <ion-content>
-  <!-- Pull-to-refresh -->
   <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <!-- Barra de búsqueda -->
   <ion-searchbar placeholder="Buscar tarea..." (ionInput)="filterTasks($event)"></ion-searchbar>
 
-  <!-- Segmento de filtros -->
   <ion-segment [(ngModel)]="selectedFilter" (ionChange)="applyFilter()">
     <ion-segment-button value="all"><ion-label>Todas</ion-label></ion-segment-button>
     <ion-segment-button value="pending"><ion-label>Pendientes</ion-label></ion-segment-button>
     <ion-segment-button value="done"><ion-label>Hechas</ion-label></ion-segment-button>
   </ion-segment>
 
-  <!-- Lista de tareas -->
-  <ion-list>
-    <ion-item *ngFor="let task of filteredTasks" button (click)="goToDetail(task.id)">
-      <ion-checkbox slot="start" [(ngModel)]="task.completed" (ngModelChange)="onToggle(task)"></ion-checkbox>
-      <ion-label [class.completed]="task.completed">
-        <h2>{{ task.title }}</h2>
-        <p>{{ task.description }}</p>
-      </ion-label>
-      <ion-badge slot="end" [color]="task.priority === 'alta' ? 'danger' : task.priority === 'media' ? 'warning' : 'success'">
-        {{ task.priority }}
-      </ion-badge>
-    </ion-item>
-  </ion-list>
-
-  <!-- Estado vacío -->
-  <div *ngIf="filteredTasks.length === 0" class="empty-state ion-text-center ion-padding">
-    <ion-icon name="clipboard-outline" size="large" color="medium"></ion-icon>
-    <h3>No hay tareas</h3>
-    <p>Crea tu primera tarea con el botón +</p>
+  <div *ngIf="loading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando tareas...</p>
   </div>
 
-  <!-- FAB para añadir -->
+  <div *ngIf="error && !loading" class="ion-text-center ion-padding">
+    <ion-icon name="cloud-offline-outline" size="large" color="danger"></ion-icon>
+    <h3>Error de conexión</h3>
+    <p>{{ error }}</p>
+    <ion-button fill="outline" color="primary" (click)="loadTasks()">
+      <ion-icon name="refresh" slot="start"></ion-icon>
+      Reintentar
+    </ion-button>
+  </div>
+
+  <ng-container *ngIf="!loading && !error">
+    <ion-list>
+      <ion-item *ngFor="let task of filteredTasks" button (click)="goToDetail(task.id)">
+        <ion-checkbox
+          slot="start"
+          [(ngModel)]="task.completed"
+          (ngModelChange)="onToggle(task)"
+          (click)="$event.stopPropagation()">
+        </ion-checkbox>
+        <ion-label [class.completed]="task.completed">
+          <h2>{{ task.title }}</h2>
+          <p>{{ task.description }}</p>
+        </ion-label>
+        <ion-badge slot="end" [color]="task.priority === 'alta' ? 'danger' : task.priority === 'media' ? 'warning' : 'success'">
+          {{ task.priority }}
+        </ion-badge>
+      </ion-item>
+    </ion-list>
+
+    <div *ngIf="filteredTasks.length === 0" class="empty-state ion-text-center ion-padding">
+      <ion-icon name="clipboard-outline" size="large" color="medium"></ion-icon>
+      <h3>No hay tareas</h3>
+      <p>Crea tu primera tarea con el botón +</p>
+    </div>
+  </ng-container>
+
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button color="primary" (click)="openAddModal()">
       <ion-icon name="add"></ion-icon>

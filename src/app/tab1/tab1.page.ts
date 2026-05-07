@@ -15,10 +15,12 @@ import {
   IonProgressBar,
   IonButton,
   IonIcon,
+  IonSpinner,
   ModalController,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { add } from 'ionicons/icons';
+import { add, refresh } from 'ionicons/icons';
 import { TaskService } from '../services/task.service';
 import { AddTaskModalComponent } from '../components/add-task-modal/add-task-modal.component';
 
@@ -43,20 +45,41 @@ import { AddTaskModalComponent } from '../components/add-task-modal/add-task-mod
     IonProgressBar,
     IonButton,
     IonIcon,
+    IonSpinner,
   ],
 })
 export class Tab1Page {
   stats = { total: 0, completed: 0, pending: 0 };
+  loading = false;
+  error: string | null = null;
 
   constructor(
     private taskService: TaskService,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private toastCtrl: ToastController
   ) {
-    addIcons({ add });
+    addIcons({ add, refresh });
   }
 
   ionViewWillEnter() {
-    this.stats = this.taskService.getStats();
+    this.loadStats();
+  }
+
+  loadStats() {
+    this.loading = true;
+    this.error = null;
+    this.taskService.loadTasks().subscribe({
+      next: () => {
+        this.stats = this.taskService.getStats();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.error =
+          'No se pudo conectar con la API. Comprueba que el servidor esté en marcha.';
+        this.loading = false;
+      },
+    });
   }
 
   async openAddTaskModal() {
@@ -67,14 +90,34 @@ export class Tab1Page {
 
     const { data } = await modal.onDidDismiss();
     if (data) {
-      this.taskService.addTask({
-        title: data.title,
-        description: data.description,
-        priority: data.priority,
-        category: data.category,
-        completed: false,
-      });
-      this.stats = this.taskService.getStats();
+      this.taskService
+        .addTask({
+          title: data.title,
+          description: data.description,
+          priority: data.priority,
+          category: data.category,
+          completed: false,
+        })
+        .subscribe({
+          next: async () => {
+            this.stats = this.taskService.getStats();
+            const toast = await this.toastCtrl.create({
+              message: 'Tarea creada correctamente',
+              duration: 2000,
+              color: 'success',
+            });
+            await toast.present();
+          },
+          error: async (err) => {
+            console.error(err);
+            const toast = await this.toastCtrl.create({
+              message: 'Error al crear la tarea',
+              duration: 2000,
+              color: 'danger',
+            });
+            await toast.present();
+          },
+        });
     }
   }
 }

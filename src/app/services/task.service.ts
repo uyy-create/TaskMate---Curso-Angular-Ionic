@@ -1,62 +1,66 @@
-import { Injectable } from "@angular/core";
-import { Task } from "../models/task.model";
+import { Injectable, inject } from '@angular/core';
+import { Observable, map, tap } from 'rxjs';
+import { Task } from '../models/task.model';
+import { ApiService } from './api.service';
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
-  private tasks: Task[] = [];
-  private nextId = 1;
-  private STORAGE_KEY = 'taskmate_tasks';
+  private api = inject(ApiService);
 
-  constructor() {
-    this.loadFromStorage();
+  private cache: Task[] = [];
+
+  loadTasks(): Observable<Task[]> {
+    return this.api.getTasks().pipe(
+      tap((tasks) => (this.cache = tasks))
+    );
   }
 
-  private saveToStorage(): void {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.tasks));
-    localStorage.setItem('taskmate_nextId', String(this.nextId));
+  getTaskById(id: number): Observable<Task> {
+    return this.api.getTask(id);
   }
 
-  private loadFromStorage(): void {
-    const saved = localStorage.getItem(this.STORAGE_KEY);
-    const savedId = localStorage.getItem('taskmate_nextId');
-    if (saved) {
-      this.tasks = JSON.parse(saved).map((t: any) => ({
-        ...t,
-        createdAt: new Date(t.createdAt)  // ← Importante: convertir string a Date
-      }));
-    }
-    if (savedId) this.nextId = parseInt(savedId);
+  addTask(data: Omit<Task, 'id' | 'createdAt'>): Observable<Task> {
+    return this.api.createTask(data).pipe(
+      tap((task) => this.cache.unshift(task))
+    );
   }
 
-  addTask(data: Omit<Task, 'id' | 'createdAt'>): Task {
-    const task: Task = { ...data, id: this.nextId++, createdAt: new Date() };
-    this.tasks.push(task);
-    this.saveToStorage();  // ← Guardar después de cada cambio
-    return task;
+  toggleComplete(task: Task): Observable<Task> {
+    return this.api
+      .updateTask(task.id, { completed: !task.completed })
+      .pipe(
+        tap((updated) => {
+          const idx = this.cache.findIndex((t) => t.id === updated.id);
+          if (idx >= 0) this.cache[idx] = updated;
+        })
+      );
   }
 
-  toggleComplete(id: number): void {
-    const task = this.tasks.find(t => t.id === id);
-    if (task) { task.completed = !task.completed; this.saveToStorage(); }
+  updateTask(id: number, changes: Partial<Task>): Observable<Task> {
+    return this.api.updateTask(id, changes).pipe(
+      tap((updated) => {
+        const idx = this.cache.findIndex((t) => t.id === updated.id);
+        if (idx >= 0) this.cache[idx] = updated;
+      })
+    );
   }
 
-  deleteTask(id: number): void {
-    this.tasks = this.tasks.filter(t => t.id !== id);
-    this.saveToStorage();
+  deleteTask(id: number): Observable<void> {
+    return this.api.deleteTask(id).pipe(
+      tap(() => {
+        this.cache = this.cache.filter((t) => t.id !== id);
+      }),
+      map(() => void 0)
+    );
   }
 
-  getTasks(): Task[] {
-    return this.tasks;
-  }
-
-  getTaskById(id: number): Task | undefined {
-    return this.tasks.find(t => t.id === id);
+  getCachedTasks(): Task[] {
+    return this.cache;
   }
 
   getStats(): { total: number; completed: number; pending: number } {
-    const total = this.tasks.length;
-    const completed = this.tasks.filter(t => t.completed).length;
-    const pending = total - completed;
-    return { total, completed, pending };
+    const total = this.cache.length;
+    const completed = this.cache.filter((t) => t.completed).length;
+    return { total, completed, pending: total - completed };
   }
 }

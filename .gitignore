@@ -35,7 +35,9 @@ lerna-debug.log*
 /bazel-out
 
 # ----- Node -----
-/node_modules
+# Sin barra inicial: ignora node_modules en cualquier subcarpeta
+# (taskmate, taskmate-api, futuros sub-proyectos, etc.)
+node_modules/
 
 # ----- Capacitor (builds nativos) -----
 # Si añades plataformas (npx cap add android / ios), estas carpetas las
@@ -95,3 +97,13 @@ testem.log
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# ----- Backend API (taskmate-api) -----
+# node_modules ya está cubierto arriba (recursivo).
+# .env / .env.* ya están cubiertos en la sección de secretos.
+# Añadimos aquí lo específico de un servidor Node/Express:
+taskmate-api/logs/
+taskmate-api/.nyc_output/
+taskmate-api/coverage/
+taskmate-api/dist/
+taskmate-api/.cache/

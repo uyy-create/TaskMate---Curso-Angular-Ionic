@@ -4,7 +4,7 @@
       <ion-back-button defaultHref="/tabs/tab2"></ion-back-button>
     </ion-buttons>
     <ion-title>Detalle</ion-title>
-    <ion-buttons slot="end">
+    <ion-buttons slot="end" *ngIf="task && !loading && !error">
       <ion-button (click)="deleteTask()" color="danger">
         <ion-icon name="trash"></ion-icon>
       </ion-button>
@@ -12,18 +12,35 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding" *ngIf="task">
-  <ion-badge [color]="task.priority === 'alta' ? 'danger' : 'warning'">
-    {{ task.priority | uppercase }}
-  </ion-badge>
-  <h1 class="ion-margin-top">{{ task.title }}</h1>
-  <p>{{ task.description || 'Sin descripción' }}</p>
-  <ion-note>Creada el {{ task.createdAt | date:'dd/MM/yyyy HH:mm' }}</ion-note>
+<ion-content class="ion-padding">
+  <div *ngIf="loading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando tarea...</p>
+  </div>
 
-  <ion-button expand="block" class="ion-margin-top"
-    [color]="task.completed ? 'medium' : 'success'"
-    (click)="toggleComplete()">
-    <ion-icon [name]="task.completed ? 'refresh' : 'checkmark'" slot="start"></ion-icon>
-    {{ task.completed ? 'Marcar como pendiente' : 'Marcar como completada' }}
-  </ion-button>
+  <div *ngIf="error && !loading" class="ion-text-center ion-padding">
+    <ion-icon name="cloud-offline-outline" size="large" color="danger"></ion-icon>
+    <h3>Error</h3>
+    <p>{{ error }}</p>
+    <ion-button fill="outline" color="primary" (click)="loadTask()">
+      <ion-icon name="refresh" slot="start"></ion-icon>
+      Reintentar
+    </ion-button>
+  </div>
+
+  <ng-container *ngIf="task && !loading && !error">
+    <ion-badge [color]="task.priority === 'alta' ? 'danger' : task.priority === 'media' ? 'warning' : 'success'">
+      {{ task.priority | uppercase }}
+    </ion-badge>
+    <h1 class="ion-margin-top">{{ task.title }}</h1>
+    <p>{{ task.description || 'Sin descripción' }}</p>
+    <ion-note>Creada el {{ task.createdAt | date:'dd/MM/yyyy HH:mm' }}</ion-note>
+
+    <ion-button expand="block" class="ion-margin-top"
+      [color]="task.completed ? 'medium' : 'success'"
+      (click)="toggleComplete()">
+      <ion-icon [name]="task.completed ? 'refresh' : 'checkmark'" slot="start"></ion-icon>
+      {{ task.completed ? 'Marcar como pendiente' : 'Marcar como completada' }}
+    </ion-button>
+  </ng-container>
 </ion-content>

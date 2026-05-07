@@ -21,9 +21,11 @@ import {
   IonFabButton,
   IonRefresher,
   IonRefresherContent,
+  IonSpinner,
+  IonButton,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { add, clipboardOutline } from 'ionicons/icons';
+import { add, clipboardOutline, refresh, cloudOfflineOutline } from 'ionicons/icons';
 
 import { TaskService } from '../services/task.service';
 import { Task } from '../models/task.model';
@@ -54,12 +56,18 @@ import { AddTaskModalComponent } from '../components/add-task-modal/add-task-mod
     IonFabButton,
     IonRefresher,
     IonRefresherContent,
+    IonSpinner,
+    IonButton,
   ],
 })
 export class Tab2Page {
   tasks: Task[] = [];
   filteredTasks: Task[] = [];
   selectedFilter: 'all' | 'pending' | 'done' = 'all';
+  searchQuery = '';
+
+  loading = false;
+  error: string | null = null;
 
   constructor(
     private taskService: TaskService,
@@ -67,39 +75,76 @@ export class Tab2Page {
     private modalCtrl: ModalController,
     private toastCtrl: ToastController
   ) {
-    addIcons({ add, clipboardOutline });
+    addIcons({ add, clipboardOutline, refresh, cloudOfflineOutline });
   }
 
   ionViewWillEnter() {
-    this.tasks = this.taskService.getTasks();
-    this.applyFilter();
+    this.loadTasks();
+  }
+
+  loadTasks(refresherEvent?: any) {
+    this.loading = !refresherEvent;
+    this.error = null;
+
+    this.taskService.loadTasks().subscribe({
+      next: (tasks) => {
+        this.tasks = tasks;
+        this.applyFilter();
+        this.loading = false;
+        refresherEvent?.target.complete();
+      },
+      error: (err) => {
+        console.error(err);
+        this.error =
+          'No se pudo conectar con la API. Comprueba que el servidor esté en marcha.';
+        this.loading = false;
+        refresherEvent?.target.complete();
+      },
+    });
   }
 
   filterTasks(event: any) {
-    const query = (event.target.value || '').toLowerCase();
-    this.filteredTasks = this.tasks.filter((t) =>
-      t.title.toLowerCase().includes(query)
-    );
+    this.searchQuery = (event.target.value || '').toLowerCase();
+    this.applyFilter();
   }
 
   applyFilter() {
+    let result = this.tasks;
     if (this.selectedFilter === 'pending') {
-      this.filteredTasks = this.tasks.filter((t) => !t.completed);
+      result = result.filter((t) => !t.completed);
     } else if (this.selectedFilter === 'done') {
-      this.filteredTasks = this.tasks.filter((t) => t.completed);
-    } else {
-      this.filteredTasks = [...this.tasks];
+      result = result.filter((t) => t.completed);
     }
+    if (this.searchQuery) {
+      result = result.filter((t) =>
+        t.title.toLowerCase().includes(this.searchQuery)
+      );
+    }
+    this.filteredTasks = result;
   }
 
   onToggle(task: Task) {
-    this.taskService.toggleComplete(task.id);
+    this.taskService.toggleComplete(task).subscribe({
+      next: (updated) => {
+        const idx = this.tasks.findIndex((t) => t.id === updated.id);
+        if (idx >= 0) this.tasks[idx] = updated;
+        this.applyFilter();
+      },
+      error: async (err) => {
+        console.error(err);
+        task.completed = !task.completed;
+        const toast = await this.toastCtrl.create({
+          message: 'No se pudo actualizar la tarea',
+          duration: 2000,
+          color: 'danger',
+        });
+        await toast.present();
+      },
+    });
   }
 
   doRefresh(event: any) {
-    this.tasks = this.taskService.getTasks();
-    this.applyFilter();
-    event.target.complete();
+    this.loadTasks(event);
   }
 
   goToDetail(id: number) {
@@ -114,17 +159,29 @@ export class Tab2Page {
 
     const { data } = await modal.onWillDismiss();
     if (data) {
-      this.taskService.addTask({ ...data, completed: false });
-      this.tasks = this.taskService.getTasks();
-      this.applyFilter();
+      this.taskService.addTask({ ...data, completed: false }).subscribe({
+        next: async (created) => {
+          this.tasks = [created, ...this.tasks];
+          this.applyFilter();
 
-      const toast = await this.toastCtrl.create({
-        message: 'Tarea creada correctamente',
-        duration: 2000,
-        position: 'bottom',
-        color: 'success',
+          const toast = await this.toastCtrl.create({
+            message: 'Tarea creada correctamente',
+            duration: 2000,
+            position: 'bottom',
+            color: 'success',
+          });
+          await toast.present();
+        },
+        error: async (err) => {
+          console.error(err);
+          const toast = await this.toastCtrl.create({
+            message: 'Error al crear la tarea',
+            duration: 2000,
+            color: 'danger',
+          });
+          await toast.present();
+        },
       });
-      await toast.present();
     }
   }
 }
