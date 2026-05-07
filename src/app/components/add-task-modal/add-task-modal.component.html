@@ -10,26 +10,53 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-item>
-    <ion-label position="floating">Título *</ion-label>
-    <ion-input [(ngModel)]="title" placeholder="¿Qué tienes que hacer?"></ion-input>
-  </ion-item>
+  <form [formGroup]="taskForm" (ngSubmit)="save()">
+    <ion-item
+      [class.ion-invalid]="taskForm.get('title')?.invalid && taskForm.get('title')?.touched"
+      [class.ion-touched]="taskForm.get('title')?.touched"
+    >
+      <ion-label position="floating">Título *</ion-label>
+      <ion-input
+        formControlName="title"
+        placeholder="¿Qué tienes que hacer?"
+      ></ion-input>
+      <ion-note slot="error">{{ titleError }}</ion-note>
+    </ion-item>
 
-  <ion-item>
-    <ion-label position="floating">Descripción</ion-label>
-    <ion-textarea [(ngModel)]="description" rows="3"></ion-textarea>
-  </ion-item>
+    <ion-item
+      [class.ion-invalid]="taskForm.get('description')?.invalid && taskForm.get('description')?.touched"
+      [class.ion-touched]="taskForm.get('description')?.touched"
+    >
+      <ion-label position="floating">Descripción</ion-label>
+      <ion-textarea formControlName="description" rows="3"></ion-textarea>
+      <ion-note slot="error">{{ descriptionError }}</ion-note>
+    </ion-item>
 
-  <ion-item>
-    <ion-label>Prioridad</ion-label>
-    <ion-select [(ngModel)]="priority" placeholder="Selecciona">
-      <ion-select-option value="alta">Alta</ion-select-option>
-      <ion-select-option value="media">Media</ion-select-option>
-      <ion-select-option value="baja">Baja</ion-select-option>
-    </ion-select>
-  </ion-item>
+    <ion-item>
+      <ion-label>Prioridad</ion-label>
+      <ion-select formControlName="priority" placeholder="Selecciona">
+        <ion-select-option value="alta">🔴 Alta</ion-select-option>
+        <ion-select-option value="media">🟡 Media</ion-select-option>
+        <ion-select-option value="baja">🟢 Baja</ion-select-option>
+      </ion-select>
+    </ion-item>
 
-  <ion-button expand="block" class="ion-margin-top" (click)="save()" [disabled]="!title.trim()">
-    Guardar Tarea
-  </ion-button>
+    <ion-item>
+      <ion-label>Categoría</ion-label>
+      <ion-select formControlName="category" placeholder="Selecciona">
+        <ion-select-option value="personal">Personal</ion-select-option>
+        <ion-select-option value="trabajo">Trabajo</ion-select-option>
+        <ion-select-option value="estudio">Estudio</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-button
+      expand="block"
+      class="ion-margin-top"
+      type="submit"
+      [disabled]="taskForm.invalid"
+    >
+      Guardar Tarea
+    </ion-button>
+  </form>
 </ion-content>

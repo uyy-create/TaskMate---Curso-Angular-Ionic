@@ -1,0 +1,18 @@
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+ion-item.ion-invalid.ion-touched {
+  --highlight-color-invalid: var(--ion-color-danger);
+
+  ion-label {
+    color: var(--ion-color-danger) !important;
+  }
+}
+
+ion-note[slot='error'] {
+  font-size: 12px;
+  color: var(--ion-color-danger);
+}

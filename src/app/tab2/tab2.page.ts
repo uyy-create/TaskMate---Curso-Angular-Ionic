@@ -19,6 +19,8 @@ import {
   IonIcon,
   IonFab,
   IonFabButton,
+  IonRefresher,
+  IonRefresherContent,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { add, clipboardOutline } from 'ionicons/icons';
@@ -50,6 +52,8 @@ import { AddTaskModalComponent } from '../components/add-task-modal/add-task-mod
     IonIcon,
     IonFab,
     IonFabButton,
+    IonRefresher,
+    IonRefresherContent,
   ],
 })
 export class Tab2Page {
@@ -90,6 +94,12 @@ export class Tab2Page {
 
   onToggle(task: Task) {
     this.taskService.toggleComplete(task.id);
+  }
+
+  doRefresh(event: any) {
+    this.tasks = this.taskService.getTasks();
+    this.applyFilter();
+    event.target.complete();
   }
 
   goToDetail(id: number) {

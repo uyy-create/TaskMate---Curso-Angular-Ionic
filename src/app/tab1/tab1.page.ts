@@ -1,13 +1,38 @@
 import { Component } from '@angular/core';
-import { IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonRow, IonTitle, IonToolbar } from '@ionic/angular/standalone';
-import { ExploreContainerComponent } from '../explore-container/explore-container.component';
+import { CommonModule } from '@angular/common';
+import {
+  IonCard,
+  IonCardContent,
+  IonCol,
+  IonContent,
+  IonGrid,
+  IonProgressBar,
+  IonRow,
+} from '@ionic/angular/standalone';
+import { TaskService } from '../services/task.service';
 
 @Component({
   selector: 'app-tab1',
   templateUrl: 'tab1.page.html',
   styleUrls: ['tab1.page.scss'],
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonGrid, IonRow, IonCol, ExploreContainerComponent],
+  standalone: true,
+  imports: [
+    CommonModule,
+    IonContent,
+    IonCard,
+    IonCardContent,
+    IonGrid,
+    IonRow,
+    IonCol,
+    IonProgressBar,
+  ],
 })
 export class Tab1Page {
-  constructor() {}
+  stats = { total: 0, completed: 0, pending: 0 };
+
+  constructor(private taskService: TaskService) {}
+
+  ionViewWillEnter() {
+    this.stats = this.taskService.getStats();
+  }
 }
