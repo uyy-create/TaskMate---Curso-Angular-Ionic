@@ -1,17 +1,48 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>
-      Tab 3
-    </ion-title>
+    <ion-title>Mi Perfil</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <!-- Avatar y nombre -->
+  <div class="profile-header">
+    <ion-avatar class="profile-avatar">
+      <img src="https://ui-avatars.com/api/?name=Tu+Nombre&background=6C63FF&color=fff&size=128" />
+    </ion-avatar>
+    <h2>Tu Nombre</h2>
+    <p>1º DAM / 2º DAM</p>
+    <ion-badge color="primary">Developer en formación</ion-badge>
+  </div>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+  <!-- Tecnologías que conoces -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-subtitle>Stack tecnológico</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-chip color="primary"><ion-label>HTML/CSS</ion-label></ion-chip>
+      <ion-chip color="secondary"><ion-label>JavaScript</ion-label></ion-chip>
+      <ion-chip color="tertiary"><ion-label>Angular</ion-label></ion-chip>
+      <ion-chip><ion-label>Ionic</ion-label></ion-chip>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Lista de info -->
+  <ion-list>
+    <ion-item>
+      <ion-icon name="school" slot="start" color="primary"></ion-icon>
+      <ion-label>
+        <h3>Centro</h3>
+        <p>IES La Puebla — Almería</p>
+      </ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-icon name="calendar" slot="start" color="primary"></ion-icon>
+      <ion-label>
+        <h3>Curso</h3>
+        <p>2024/2025</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
 </ion-content>
