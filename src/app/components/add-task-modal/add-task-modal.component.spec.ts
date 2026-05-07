@@ -1,16 +1,21 @@
-import { ModalController } from '@ionic/angular';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { AddTaskModalComponent } from './add-task-modal.component';
 
-export class AddTaskModalComponent {
-  title = '';
-  description = '';
-  priority = 'media';
+describe('AddTaskModalComponent', () => {
+  let component: AddTaskModalComponent;
+  let fixture: ComponentFixture<AddTaskModalComponent>;
 
-  constructor(private modalCtrl: ModalController) {}
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [AddTaskModalComponent],
+    }).compileComponents();
 
-  dismiss() { this.modalCtrl.dismiss(); }
+    fixture = TestBed.createComponent(AddTaskModalComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  }));
 
-  save() {
-    if (!this.title.trim()) return;
-    this.modalCtrl.dismiss({ title: this.title, description: this.description, priority: this.priority });
-  }
-}
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});

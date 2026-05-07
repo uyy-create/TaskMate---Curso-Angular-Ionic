@@ -1,20 +1,88 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AlertController } from '@ionic/angular/standalone';
+import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButtons,
+  IonBackButton,
+  IonButton,
+  IonIcon,
+  IonBadge,
+  IonNote,
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { trash, checkmark, refresh } from 'ionicons/icons';
+
+import { TaskService } from '../../services/task.service';
+import { Task } from '../../models/task.model';
 
 @Component({
   selector: 'app-task-detail',
   templateUrl: './task-detail.page.html',
   styleUrls: ['./task-detail.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonButtons,
+    IonBackButton,
+    IonButton,
+    IonIcon,
+    IonBadge,
+    IonNote,
+  ],
 })
 export class TaskDetailPage implements OnInit {
+  task: Task | undefined;
 
-  constructor() { }
-
-  ngOnInit() {
+  constructor(
+    private route: ActivatedRoute,
+    private taskService: TaskService,
+    private router: Router,
+    private alertCtrl: AlertController
+  ) {
+    addIcons({ trash, checkmark, refresh });
   }
 
+  ngOnInit() {
+    const id = parseInt(this.route.snapshot.paramMap.get('id') || '0', 10);
+    this.task = this.taskService.getTaskById(id);
+  }
+
+  toggleComplete() {
+    if (this.task) {
+      this.taskService.toggleComplete(this.task.id);
+      this.task = this.taskService.getTaskById(this.task.id);
+    }
+  }
+
+  async deleteTask() {
+    const alert = await this.alertCtrl.create({
+      header: 'Eliminar tarea',
+      message: '¿Estás seguro? Esta acción no se puede deshacer.',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Eliminar',
+          role: 'destructive',
+          handler: () => {
+            if (this.task) {
+              this.taskService.deleteTask(this.task.id);
+              this.router.navigate(['/tabs/tab2']);
+            }
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
 }

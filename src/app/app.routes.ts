@@ -6,7 +6,7 @@ export const routes: Routes = [
     loadChildren: () => import('./tabs/tabs.routes').then((m) => m.routes),
   },
   {
-    path: 'task-detail',
+    path: 'task-detail/:id',
     loadComponent: () => import('./pages/task-detail/task-detail.page').then( m => m.TaskDetailPage)
   },
 ];
