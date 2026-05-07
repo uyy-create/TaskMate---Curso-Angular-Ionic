@@ -5,13 +5,11 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- Saludo personalizado -->
   <div class="welcome-section">
     <h2>¡Hola, Developer! 👋</h2>
-    <p>Tienes <strong>0 tareas</strong> pendientes hoy.</p>
+    <p>Tienes <strong>{{ stats.pending }} tareas</strong> pendientes.</p>
   </div>
 
-  <!-- Tarjeta de resumen -->
   <ion-card>
     <ion-card-header>
       <ion-card-title>Resumen del día</ion-card-title>
@@ -20,21 +18,36 @@
       <ion-grid>
         <ion-row>
           <ion-col class="stat-col">
-            <div class="stat-number">0</div>
-            <div class="stat-label">Pendientes</div>
+            <div class="stat-number">{{ stats.total }}</div>
+            <div class="stat-label">Total</div>
           </ion-col>
           <ion-col class="stat-col">
-            <div class="stat-number">0</div>
-            <div class="stat-label">Completadas</div>
+            <div class="stat-number" style="color: var(--ion-color-success)">{{ stats.completed }}</div>
+            <div class="stat-label">Hechas</div>
+          </ion-col>
+          <ion-col class="stat-col">
+            <div class="stat-number" style="color: var(--ion-color-warning)">{{ stats.pending }}</div>
+            <div class="stat-label">Pendientes</div>
           </ion-col>
         </ion-row>
       </ion-grid>
+
+      <!-- Barra de progreso -->
+      <div class="ion-margin-top">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <small>Progreso del día</small>
+          <small>{{ stats.total > 0 ? ((stats.completed / stats.total) * 100 | number:'1.0-0') : 0 }}%</small>
+        </div>
+        <ion-progress-bar
+          [value]="stats.total > 0 ? stats.completed / stats.total : 0"
+          color="success">
+        </ion-progress-bar>
+      </div>
     </ion-card-content>
   </ion-card>
 
-  <!-- Botón de acción principal -->
-  <ion-button expand="block" color="primary" class="ion-margin-top">
+  <ion-button expand="block" color="primary" class="ion-margin-top" (click)="openAddTaskModal()">
     <ion-icon name="add" slot="start"></ion-icon>
-    
+    Añadir tarea
   </ion-button>
 </ion-content>
