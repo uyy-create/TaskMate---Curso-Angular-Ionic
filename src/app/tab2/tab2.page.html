@@ -1,17 +1,45 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>
-      Tab 2
-    </ion-title>
+    <ion-title>Mis Tareas</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  <!-- Barra de búsqueda -->
+  <ion-searchbar placeholder="Buscar tarea..." (ionInput)="filterTasks($event)"></ion-searchbar>
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+  <!-- Segmento de filtros -->
+  <ion-segment [(ngModel)]="selectedFilter" (ionChange)="applyFilter()">
+    <ion-segment-button value="all"><ion-label>Todas</ion-label></ion-segment-button>
+    <ion-segment-button value="pending"><ion-label>Pendientes</ion-label></ion-segment-button>
+    <ion-segment-button value="done"><ion-label>Hechas</ion-label></ion-segment-button>
+  </ion-segment>
+
+  <!-- Lista de tareas -->
+  <ion-list>
+    <ion-item *ngFor="let task of filteredTasks" button (click)="goToDetail(task.id)">
+      <ion-checkbox slot="start" [(ngModel)]="task.completed" (ngModelChange)="onToggle(task)"></ion-checkbox>
+      <ion-label [class.completed]="task.completed">
+        <h2>{{ task.title }}</h2>
+        <p>{{ task.description }}</p>
+      </ion-label>
+      <ion-badge slot="end" [color]="task.priority === 'alta' ? 'danger' : task.priority === 'media' ? 'warning' : 'success'">
+        {{ task.priority }}
+      </ion-badge>
+    </ion-item>
+  </ion-list>
+
+  <!-- Estado vacío -->
+  <div *ngIf="filteredTasks.length === 0" class="empty-state ion-text-center ion-padding">
+    <ion-icon name="clipboard-outline" size="large" color="medium"></ion-icon>
+    <h3>No hay tareas</h3>
+    <p>Crea tu primera tarea con el botón +</p>
+  </div>
+
+  <!-- FAB para añadir -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="primary" (click)="openAddModal()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>
