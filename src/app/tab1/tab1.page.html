@@ -1,17 +1,40 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 1
-    </ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>TaskMate</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <!-- Saludo personalizado -->
+  <div class="welcome-section">
+    <h2>¡Hola, Developer! 👋</h2>
+    <p>Tienes <strong>0 tareas</strong> pendientes hoy.</p>
+  </div>
 
-  <app-explore-container name="Tab 1 page"></app-explore-container>
+  <!-- Tarjeta de resumen -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Resumen del día</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col class="stat-col">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Pendientes</div>
+          </ion-col>
+          <ion-col class="stat-col">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Completadas</div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Botón de acción principal -->
+  <ion-button expand="block" color="primary" class="ion-margin-top">
+    <ion-icon name="add" slot="start"></ion-icon>
+    Nueva Tarea
+  </ion-button>
 </ion-content>
